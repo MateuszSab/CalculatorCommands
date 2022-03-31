@@ -1,3 +1,5 @@
 sum 5
 subtract 3
 multiply 10
+divide 4
+negation

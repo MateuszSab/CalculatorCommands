@@ -5,18 +5,22 @@ object Main extends App {
   val fileName = "C:\\CalculatorCommands\\operations.txt"
   val lines = Source.fromFile(fileName).getLines.toSeq
   val commands = lines.map(Commands.from)
-  val current = commands.foldLeft(Calculator) { (c, cmd) =>
+  val current = commands.foreach { cmd =>
     Calculator.execute(cmd)
-    println(Calculator.opStack.head)
-    Calculator
+//    println(cmd)
+//    println(Calculator.opStack.head)
+//    Calculator
   }
+  println("ostatni element " + Calculator.opStack.last)
 }
 object Commands{
   val acceptedComands = Map(
     "sum" -> Sum.from _,
     "subtract" -> Subtract.from _,
     "multiply" -> Multiply.from _,
-    "divide" -> Divide.from _
+    "divide" -> Divide.from _,
+    "negation" -> Negation.from _,
+    "print" -> Print.from _
   )
   def from(l: String)={
     val name = l.split("\\s+").head.toLowerCase()
@@ -31,7 +35,8 @@ object Calculator{
     case a: Subtract => opStack.addOne(opStack.pop() - a.x)
     case m: Multiply => opStack.addOne(opStack.pop() * m.x)
     case d: Divide => opStack.addOne(opStack.pop() / d.x)
-    case n: Negation => opStack.addOne(-opStack.head)
+    case n: Negation => opStack.addOne(-opStack.pop())
+    case p: Print => println(opStack.last)
   }
 }
 
@@ -72,20 +77,20 @@ object Divide {
   }
 }
 
-case class Negation(n: Int)
+case class Negation()
 
 object Negation {
   def from(s: String) = {
-    val Array(_, x) = s.split("\\s+")
-    Negation(x.toInt)
+    val Array(_) = s.split("\\s+")
+    Negation()
   }
 }
 
-case class Print(n: Int)
+case class Print()
 
 object Print {
   def from(s: String) = {
-    val Array(_, x) = s.split("\\s+")
-    Print(x.toInt)
+    val Array(_) = s.split("\\s+")
+    Print()
   }
 }
