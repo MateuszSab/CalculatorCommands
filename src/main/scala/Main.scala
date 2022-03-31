@@ -3,15 +3,13 @@ import scala.io.Source
 
 object Main extends App {
   val fileName = "C:\\CalculatorCommands\\operations.txt"
-  val lines = Source.fromFile(fileName).getLines.toSeq
-  val commands = lines.map(Commands.from)
-  val current = commands.foreach { cmd =>
-    Calculator.execute(cmd)
+  val calc = new Calculator
+  calc.runCalc(fileName)
 //    println(cmd)
 //    println(Calculator.opStack.head)
 //    Calculator
-  }
-  println("ostatni element " + Calculator.opStack.last)
+
+  println("ostatni element " + calc.opStack.head)
 }
 object Commands{
   val acceptedComands = Map(
@@ -28,14 +26,26 @@ object Commands{
     fromMethod(l)
   }
 }
-object Calculator{
+
+class Calculator{
+  def runCalc(name: String)={
+    linesToCmd(linesFromFile(name)).foreach{(cmd)=>
+      execute(cmd)
+    }
+  }
+  def linesFromFile(name: String) =  {
+    Source.fromFile(name).getLines.toSeq
+  }
+  def linesToCmd(ss: Seq[String]) = {
+    ss.map(Commands.from)
+  }
   val opStack = mutable.Stack(0)
   def execute(cmd: Product) = cmd match{
-    case c: Sum => opStack.addOne( opStack.pop() + c.x)
-    case a: Subtract => opStack.addOne(opStack.pop() - a.x)
-    case m: Multiply => opStack.addOne(opStack.pop() * m.x)
-    case d: Divide => opStack.addOne(opStack.pop() / d.x)
-    case n: Negation => opStack.addOne(-opStack.pop())
+    case c: Sum => opStack.addOne( opStack.last + c.x)
+    case a: Subtract => opStack.addOne(opStack.last - a.x)
+    case m: Multiply => opStack.addOne(opStack.last * m.x)
+    case d: Divide => opStack.addOne(opStack.last / d.x)
+    case n: Negation => opStack.addOne(-opStack.last)
     case p: Print => println(opStack.last)
   }
 }
@@ -73,7 +83,12 @@ case class Divide(x: Int)
 object Divide {
   def from(s: String) = {
     val Array(_, x) = s.split("\\s+")
-    Divide(x.toInt)
+    if (x.toInt != 0) {
+      Divide(x.toInt)
+    }else{
+      println("Cannot divide by 0")
+      Divide(1)
+    }
   }
 }
 
